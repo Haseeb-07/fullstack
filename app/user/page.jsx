@@ -23,11 +23,18 @@ export default function User() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visibleItems, setVisibleItems] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchUsers() {
       try {
         const response = await fetch("https://randomuser.me/api/?results=500");
+        
+        // Check if response is ok (status 200-299)
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
         const data = await response.json();
         setUsers(data.results);
 
@@ -40,6 +47,7 @@ export default function User() {
         });
       } catch (error) {
         console.error("Error fetching users:", error);
+        setError("Error fetching users. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -50,12 +58,18 @@ export default function User() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Users List</h1>
-      {loading ? (
+      {loading && (
         <div className="flex flex-col items-center justify-center mt-20">
           <div className="spinner mb-2"></div>
           <p className="text-lg">Loading users...</p>
         </div>
-      ) : (
+      )}
+      {error && (
+        <div className="text-red-500 text-lg mt-4 text-center">
+          {error}
+        </div>
+      )}
+      {!loading && !error && (
         <List
           height={800}
           itemCount={users.length}
